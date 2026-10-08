@@ -1,0 +1,36 @@
+services:
+  vault:
+    build: .
+    restart: unless-stopped
+    environment:
+      DATA_DIR: /var/www/hallevault
+      REQUIRE_STORAGE: "true"
+      SECURE_COOKIES: "true"
+      MAX_FILE_MB: "200"
+    volumes:
+      - /media/pi/Seagate/hallevault:/var/www/hallevault
+    expose:
+      - "8080"
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    environment:
+      VAULT_DOMAIN: ${VAULT_DOMAIN:?Set VAULT_DOMAIN in .env}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+    depends_on:
+      - vault
+volumes:
+  caddy-data:
+  caddy-config:
