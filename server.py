@@ -1,6 +1,7 @@
 import os, json, sqlite3, secrets, hashlib, hmac, time, pathlib, mimetypes, threading
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from urllib.parse import urlsplit, parse_qs, quote
+from default_user import insert_default_user
 
 DATA = pathlib.Path(os.environ.get('DATA_DIR', '/var/www/hallevault')).resolve()
 REQUIRE_STORAGE = os.environ.get('REQUIRE_STORAGE', 'true').lower() == 'true'
@@ -39,8 +40,7 @@ if not REQUIRE_STORAGE or MARKER.is_file():
         c.executescript('''CREATE TABLE IF NOT EXISTS users(id INTEGER PRIMARY KEY, username TEXT UNIQUE, password TEXT);
         CREATE TABLE IF NOT EXISTS sessions(token TEXT PRIMARY KEY,user_id INTEGER,csrf TEXT,expires REAL);
         CREATE TABLE IF NOT EXISTS items(id TEXT PRIMARY KEY,parent TEXT REFERENCES items(id),name TEXT NOT NULL,kind TEXT NOT NULL,size INTEGER DEFAULT 0,blob TEXT,updated REAL,UNIQUE(parent,name));''')
-        if not c.execute('SELECT 1 FROM users').fetchone():
-            c.execute('INSERT INTO users(username,password) VALUES(?,?)', ('user', password_hash(os.environ.get('INITIAL_PASSWORD', 'pass'))))
+        insert_default_user(c, password_hash)
 
 class Handler(BaseHTTPRequestHandler):
     # Close every connection so idle keep-alive clients cannot block the next request.

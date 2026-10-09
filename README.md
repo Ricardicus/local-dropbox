@@ -2,7 +2,7 @@
 
 A personal file vault with a quiet green interface. Upload and download work files, organize them in folders, and replace files when you have a newer copy. Files are stored on the server, so you can access them from different devices.
 
-**First login:** username `Anna`, password `byxficka`. Change the password under **Settings** as soon as you sign in.
+**First login:** username `user`, password `pass` (or the value of `INITIAL_PASSWORD`). The initial account is inserted by `default_user.py` only when the users table is empty; edit that file to change the defaults before first startup. Change the password under **Settings** as soon as you sign in.
 
 ## Run on your computer
 
@@ -60,6 +60,14 @@ docker compose -f compose2.yaml exec reverse nginx -t
 If `sites-enabled/hallevault.conf` already exists, skip the `ln -s` command. This assumes your existing Nginx image copies `conf.d/` and `nginx.conf` includes `sites-enabled/`, as your other sites require. If your enabled configurations are regular copies instead of symlinks, use `cp nginx/conf.d/sites-available/hallevault.conf nginx/conf.d/sites-enabled/hallevault.conf` instead. Inspect the reverse service logs if it does not start.
 
 Open **http://hallevault.ricardicus.se** after DNS resolves. This configuration uses HTTP, matching the existing reverse proxy. Serve the app at the root of its hostname; its URLs do not support a `/hallevault/` subpath. For backup/reset commands below, use `docker compose -f compose2.yaml` and replace the service name `vault` with `hallevault`.
+
+## BRF website on another LAN device
+
+[BRF-TLS.md](BRF-TLS.md) configures `brfrynningeasen.se` and `www.brfrynningeasen.se` with TLS on both `.150` (Nginx proxy) and `.197` (website), including separate automatic certificate renewal on both devices.
+
+## HTTPS with your existing Nginx
+
+Follow [TLS.md](TLS.md) to enable **https://hallevault.ricardicus.se**, obtain a Let’s Encrypt certificate, redirect HTTP, enable secure cookies, and configure automatic renewal. The instructions include the initial HTTP setup needed before the certificate exists.
 
 ## Deploy on a server
 
